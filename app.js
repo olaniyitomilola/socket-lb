@@ -10,13 +10,7 @@ const { DB, insertChat, getAllChats, getChats } = require('./database');
 
 app.use(cors())
 
-
-
-
 const server = http.createServer(app);
-
-
-
 const io = new Server(server, {
     cors: {
       origin: 'http://localhost:3000',
@@ -25,10 +19,11 @@ const io = new Server(server, {
   });
 
 
-  io.on('connection', (socket) => {
+  io.on("connection", (socket) => {
  //   console.log(socket.rooms)
     socket.on('in_chat',async (data)=>{
       socket.join((data.language + data.level).toLowerCase());
+      console.log(socket.rooms)
 
         try {
            let myMessages = await getChats((data.language + data.level).toLowerCase())
@@ -53,8 +48,11 @@ const io = new Server(server, {
 
     socket.on('new_message', async (data)=>{
         console.log(data)
-       // await insertChat(data.user_id,data.room,data.text);
-        io.emit('recieve_messages',data)
+       await insertChat(data.user_id,data.room,data.text);
+
+       console.log(data.room)
+       console.log(socket.rooms)
+        io.to(data.room).emit('recieve_messages',data)
     })
     
     socket.on('disconnect', () => {
