@@ -1,12 +1,17 @@
 
 const { Server } = require('socket.io');
 
+
 const http =  require('http')
 const express = require('express')
 const app = express();
 const cors = require('cors');
+const { DB, insertChat, getAllChats, getChats } = require('./database');
 
 app.use(cors())
+
+
+
 
 const server = http.createServer(app);
 
@@ -21,24 +26,34 @@ const io = new Server(server, {
 
 
   io.on('connection', (socket) => {
+ //   console.log(socket.rooms)
+    socket.on('in_chat',async (data)=>{
+      socket.join((data.language + data.level).toLowerCase());
 
-    socket.on('in_chat',(data)=>{
-        let room = (data.language + data.level).toLowerCase()
-        socket.join(room);
-        // socket.emit('initialMessage',rooms[room])
-        console.log(`User: ${data.first_name} joined room ${room} `)
+        try {
+           let myMessages = await getChats((data.language + data.level).toLowerCase())
+           console.log(myMessages)
+           io.to(socket.id).emit('userMessages',myMessages)
+
+           console.log(`User: ${data.first_name} joined room ${(data.language + data.level).toLowerCase()} `)
+          
+        } catch (error) {
+          console.log(error)
+        }
+       
        
 
     })
 
-    socket.on('send_message', async (data)=>{
-        console.log(data)
-        io.in(data.room).emit('recieve_messages',data)
-    })
+    // socket.on('mymessage', async (data)=>{
+    //     console.log(data)
+    //     io.in(data.room).emit('recieve_messages',data)
+    // })
 
 
     socket.on('new_message', async (data)=>{
         console.log(data)
+       // await insertChat(data.user_id,data.room,data.text);
         io.emit('recieve_messages',data)
     })
     
@@ -50,6 +65,13 @@ const io = new Server(server, {
     
   });
 
-  server.listen(3004,()=>{
-    console.log('server listening on 3004')
+  server.listen(3004,async ()=>{
+    try {
+      DB.connect();
+          console.log('server listening on 3004')
+          console.log(await getAllChats())
+
+    } catch (error) {
+      console.log(error)
+    }
   })
