@@ -32,7 +32,7 @@ const io = new Server(server, {
 
         try {
            let myMessages = await getChats((data.language + data.level).toLowerCase())
-           console.log(myMessages)
+          //  console.log(myMessages)
            io.to(socket.id).emit('userMessages',myMessages)
 
            console.log(`User: ${data.first_name} joined room ${(data.language + data.level).toLowerCase()} `)
@@ -58,7 +58,7 @@ const io = new Server(server, {
     })
     
     socket.on('disconnect', () => {
-    //  console.log(`User ${socket.id} disconnected`);
+    //  console.log(`User ${socket.id} disconnected`);q
     });
 
    
@@ -69,7 +69,7 @@ const io = new Server(server, {
     try {
       DB.connect();
           console.log('server listening on 3004')
-          console.log(await getAllChats())
+      //    console.log(await getAllChats())
 
     } catch (error) {
       console.log(error)

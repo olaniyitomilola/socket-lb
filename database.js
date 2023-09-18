@@ -28,7 +28,6 @@ async function getChats(room){
     
 }
 
-
 async function getAllChats(){
     const query = `SELECT m.*, u.first_name, u.last_name
                 FROM messages m
